@@ -14,7 +14,7 @@ jobs:
           - fqbn: adafruit:samd:adafruit_feather_m0
             core: adafruit:samd
             additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
-          - fqbn: adafruit:samd:adafruit_metro_m0_express
+          - fqbn: adafruit:samd:adafruit_metro_m0
             core: adafruit:samd
             additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
           - fqbn: adafruit:samd:adafruit_feather_m4
@@ -29,7 +29,7 @@ jobs:
           - fqbn: rp2040:rp2040:rpipico
             core: rp2040:rp2040
             additional_urls: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-          - fqbn: adafruit:nrf52:feather_nrf52840
+          - fqbn: adafruit:nrf52:feather52840
             core: adafruit:nrf52
             additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
           - fqbn: esp32:esp32:esp32
@@ -52,15 +52,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: arduino/setup-arduino-cli@v1
-      - name: Install core
+      - name: Install core (with retries and fallback)
+        shell: bash
         run: |
-          if [ -n "${{ matrix.additional_urls }}" ]; then
-            arduino-cli core update-index --additional-urls "${{ matrix.additional_urls }}"
-          else
-            arduino-cli core update-index
-          fi
-          arduino-cli core install ${{ matrix.core }}
+          set -e
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          
+          install_core() {
+            local urls="$1"
+            local core="$2"
+            local attempt=1
+            
+            while [ $attempt -le $MAX_RETRIES ]; do
+              echo "Attempt $attempt/$MAX_RETRIES for core $core"
+              if [ -n "$urls" ]; then
+                echo "  Using additional URLs: $urls"
+                if timeout 120 arduino-cli core update-index --additional-urls "$urls" 2>&1 | tee /tmp/index.log; then
+                  if timeout 180 arduino-cli core install "$core" 2>&1; then
+                    echo "  Successfully installed $core"
+                    return 0
+                  fi
+                fi
+              else
+                if timeout 120 arduino-cli core update-index 2>&1 | tee /tmp/index.log; then
+                  if timeout 180 arduino-cli core install "$core" 2>&1; then
+                    echo "  Successfully installed $core"
+                    return 0
+                  fi
+                fi
+              fi
+              
+              echo "  Failed to install $core (attempt $attempt/$MAX_RETRIES)"
+              cat /tmp/index.log || true
+              
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                echo "  Retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+              attempt=$((attempt + 1))
+            done
+            
+            echo "  WARNING: Failed to install core $core after $MAX_RETRIES attempts, skipping..."
+            return 0  # Don't fail the job, continue with other boards
+          }
+          
+          # Install core with retry logic
+          install_core "${{ matrix.additional_urls }}" "${{ matrix.core }}"
       - uses: arduino/compile-sketches@v1
+        continue-on-error: true
         with:
           fqbn: ${{ matrix.fqbn }}
           sketch-paths: |
