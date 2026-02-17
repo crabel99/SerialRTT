@@ -20,6 +20,11 @@
     },
     "build": {
         "includeDir": "src",
+        "srcFilter": [
+            "+<SerialRTT.cpp>",
+            "+<SEGGER_RTT/RTT/*.c>",
+            "+<SEGGER_RTT/RTT/*.S>"
+        ],
         "flags": [
             "-Isrc/SEGGER_RTT",
             "-Isrc/SEGGER_RTT/RTT",
