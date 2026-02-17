@@ -21,7 +21,9 @@
     "build": {
         "includeDir": "src",
         "flags": [
-            "-Isrc/SEGGER_RTT"
+            "-Isrc/SEGGER_RTT",
+            "-Isrc/SEGGER_RTT/RTT",
+            "-Isrc/SEGGER_RTT/Config"
         ]
     },
     "frameworks": "arduino",

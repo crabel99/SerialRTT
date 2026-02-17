@@ -5,7 +5,7 @@
 #include <string.h>
 
 extern "C" {
-#include "SEGGER_RTT/SEGGER_RTT.h"
+#include "SEGGER_RTT/RTT/SEGGER_RTT.h"
 }
 
 // ============================================================================
