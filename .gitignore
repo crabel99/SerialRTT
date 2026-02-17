@@ -3,11 +3,7 @@
 .env
 .env.*
 .python-version
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
+.vscode
 logs/
 
 # Python
