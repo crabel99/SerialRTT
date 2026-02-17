@@ -1,0 +1,41 @@
+SerialRTT Licensing
+===================
+
+This repository contains original project code and third-party bundled code.
+
+1) Project code (MIT)
+---------------------
+
+Unless otherwise noted in a source file header, code in this repository is:
+
+Copyright (c) 2025-2026 Cal Abel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+2) Third-party code
+-------------------
+
+This repository vendors SEGGER RTT source files (for example `SEGGER_RTT.c`,
+`SEGGER_RTT.h`, and related support files). Those files remain under SEGGER's
+license terms included in their file headers.
+
+You must preserve the original license/copyright notices for those files when
+redistributing source.
+
+See `THIRD_PARTY_NOTICES.md` for an inventory and attribution summary.

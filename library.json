@@ -1,0 +1,29 @@
+{
+    "name": "SerialRTT",
+    "version": "1.0.0",
+    "description": "Arduino Stream-compatible SEGGER RTT serial implementation for fast debug I/O",
+    "license": "MIT",
+    "keywords": [
+        "rtt",
+        "serial",
+        "debug",
+        "jlink",
+        "segger",
+        "stream"
+    ],
+    "authors": {
+        "name": "Cal Abel"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/crabel99/SerialRTT.git"
+    },
+    "build": {
+        "includeDir": "src",
+        "flags": [
+            "-Isrc/SEGGER_RTT"
+        ]
+    },
+    "frameworks": "arduino",
+    "platforms": ["atmelsam", "ststm32", "nordicnrf52", "espressif32"]
+}

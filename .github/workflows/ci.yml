@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  arduino-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: false
+          compliance: specification
+
+  compile-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - fqbn: adafruit:samd:adafruit_feather_m0
+            core: adafruit:samd
+            additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          - fqbn: adafruit:samd:adafruit_metro_m0_express
+            core: adafruit:samd
+            additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          - fqbn: adafruit:samd:adafruit_feather_m4
+            core: adafruit:samd
+            additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          - fqbn: adafruit:samd:adafruit_metro_m4
+            core: adafruit:samd
+            additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          - fqbn: STMicroelectronics:stm32:GenF4
+            core: STMicroelectronics:stm32
+            additional_urls: https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+          - fqbn: rp2040:rp2040:rpipico
+            core: rp2040:rp2040
+            additional_urls: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+          - fqbn: adafruit:nrf52:feather_nrf52840
+            core: adafruit:nrf52
+            additional_urls: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          - fqbn: esp32:esp32:esp32
+            core: esp32:esp32
+            additional_urls: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          - fqbn: esp32:esp32:esp32c3
+            core: esp32:esp32
+            additional_urls: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          - fqbn: teensy:avr:teensy41
+            core: teensy:avr
+            additional_urls: https://www.pjrc.com/teensy/package_teensy_index.json
+          - fqbn: arduino:renesas_uno:unor4wifi
+            core: arduino:renesas_uno
+          - fqbn: arduino:sam:arduino_due_x
+            core: arduino:sam
+          - fqbn: arduino:mbed_nano:nano33ble
+            core: arduino:mbed_nano
+          - fqbn: arduino:mbed_portenta:envie_m7
+            core: arduino:mbed_portenta
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v1
+      - name: Install core
+        run: |
+          if [ -n "${{ matrix.additional_urls }}" ]; then
+            arduino-cli core update-index --additional-urls "${{ matrix.additional_urls }}"
+          else
+            arduino-cli core update-index
+          fi
+          arduino-cli core install ${{ matrix.core }}
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.fqbn }}
+          sketch-paths: |
+            examples/basic_serial_rtt
+          libraries: |
+            .
+
+  python-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install black mypy
+      - name: Black
+        run: black --check scripts
+      - name: Mypy
+        run: mypy scripts
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+      - name: Format check
+        run: clang-format --Werror --dry-run src/SerialRTT.cpp src/SerialRTT.h

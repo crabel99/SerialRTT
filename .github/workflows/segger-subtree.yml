@@ -1,0 +1,41 @@
+name: Sync SEGGER RTT Subtree
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Update SEGGER RTT subtree
+        run: |
+          set -e
+          git remote add segger https://github.com/SEGGERMicro/RTT.git || true
+          git fetch segger --prune
+          if git show-ref --verify --quiet refs/remotes/segger/main; then
+            SEGGER_REF=main
+          else
+            SEGGER_REF=master
+          fi
+          git subtree pull --prefix src/SEGGER_RTT segger "$SEGGER_REF" --squash
+      - name: Commit and push if changed
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add -A
+            git commit -m "chore: sync SEGGER RTT subtree"
+            git push
+          else
+            echo "No changes to commit."
+          fi
